@@ -1,1 +1,3 @@
-# My Project
+# medicalNER
+
+Clinical Naned Entetiy Recognition
