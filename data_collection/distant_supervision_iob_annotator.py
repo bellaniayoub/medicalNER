@@ -23,18 +23,29 @@ def load_knowledge_base():
         symptom_terms = set(symptoms['Name'].str.lower())
         print(f"Loaded {len(symptom_terms)} symptom terms")
         
+        # Load genes from CSV
+        genes = pd.read_csv('Knowledge_base/data/gene_ontology.csv')
+        gene_terms = set(genes['Name'].str.lower())
+        print(f"Loaded {len(gene_terms)} gene terms")
+        
         return {
             'DISEASE': disease_terms,
-            'SYMPTOM': symptom_terms
+            'SYMPTOM': symptom_terms,
+            'GENE': gene_terms
         }
     except Exception as e:
         print(f"Error loading knowledge base: {str(e)}")
         sys.exit(1)
 
 def preprocess_term(term):
-    # Remove special characters and extra spaces
-    term = re.sub(r'[^\w\s]', ' ', term)
+    # Keep important medical and genetic special characters
+    # Keep: '-', '+', '/', '(', ')', ':', '.', ',', '&', '_', '*', '~', '#'
+    # These are common in gene names and medical terms
+    term = re.sub(r'[^\w\s\-+/():.,&_*~#]', ' ', term)
+    
+    # Remove extra spaces but preserve single spaces
     term = ' '.join(term.split())
+    
     return term.lower()
 
 def similar(a, b, threshold=0.8):
@@ -60,7 +71,7 @@ def create_iob_annotations(text, knowledge_base):
                 term = preprocess_term(term)
                 
                 # Skip very short terms that might cause false positives
-                if len(term.split()) < 2 and len(term) < 4:
+                if len(term.split()) < 2 and len(term) < 4 and entity_type != 'GENE':
                     continue
                 
                 # Find exact matches
@@ -82,30 +93,31 @@ def create_iob_annotations(text, knowledge_base):
                             break
                         token_start += len(token) + 1  # +1 for space
                 
-                # Find fuzzy matches
-                words = text_lower.split()
-                for i in range(len(words) - len(term.split()) + 1):
-                    candidate = ' '.join(words[i:i + len(term.split())])
-                    if similar(candidate, term):
-                        # Find the exact position in original text
-                        start = text_lower.find(candidate)
-                        if start != -1:
-                            end = start + len(candidate)
-                            # Find which tokens are covered by this span
-                            token_start = 0
-                            for i, token in enumerate(tokens):
-                                token_end = token_start + len(token)
-                                if token_start <= start < token_end:
-                                    # This is the first token of the entity
-                                    iob_tags[i] = f'B-{entity_type}'
-                                    # Mark subsequent tokens as inside the entity
-                                    j = i + 1
-                                    while j < len(tokens) and token_start + len(token) <= end:
-                                        iob_tags[j] = f'I-{entity_type}'
-                                        token_start += len(tokens[j]) + 1  # +1 for space
-                                        j += 1
-                                    break
-                                token_start += len(token) + 1  # +1 for space
+                # Find fuzzy matches (except for genes)
+                if entity_type != 'GENE':
+                    words = text_lower.split()
+                    for i in range(len(words) - len(term.split()) + 1):
+                        candidate = ' '.join(words[i:i + len(term.split())])
+                        if similar(candidate, term):
+                            # Find the exact position in original text
+                            start = text_lower.find(candidate)
+                            if start != -1:
+                                end = start + len(candidate)
+                                # Find which tokens are covered by this span
+                                token_start = 0
+                                for i, token in enumerate(tokens):
+                                    token_end = token_start + len(token)
+                                    if token_start <= start < token_end:
+                                        # This is the first token of the entity
+                                        iob_tags[i] = f'B-{entity_type}'
+                                        # Mark subsequent tokens as inside the entity
+                                        j = i + 1
+                                        while j < len(tokens) and token_start + len(token) <= end:
+                                            iob_tags[j] = f'I-{entity_type}'
+                                            token_start += len(tokens[j]) + 1  # +1 for space
+                                            j += 1
+                                        break
+                                    token_start += len(token) + 1  # +1 for space
         
         return tokens, iob_tags
     except Exception as e:
