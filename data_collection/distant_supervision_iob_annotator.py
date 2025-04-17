@@ -8,7 +8,6 @@ from difflib import SequenceMatcher
 import matplotlib.pyplot as plt
 from collections import Counter
 import sys
-import time
 
 def load_knowledge_base():
     print("Loading knowledge base...")
@@ -164,12 +163,9 @@ def visualize_iob_annotations(annotations, output_dir):
     except Exception as e:
         print(f"Error creating visualizations: {str(e)}")
 
-# New main function that processes only 5 articles with timing information
 def main():
     try:
-        print("Starting IOB annotation process for 5 articles...")
-        start_time_total = time.time()
-        
+        print("Starting IOB annotation process...")
         # Load knowledge base
         knowledge_base = load_knowledge_base()
         
@@ -178,18 +174,11 @@ def main():
         reports = pd.read_csv('report_data/data/pubmed_medical_reports.csv')
         print(f"Loaded {len(reports)} reports")
         
-        # Limit to 5 articles
-        reports = reports.head(5)
-        print(f"Processing only {len(reports)} articles")
-        
         # Process each report
         print("Processing reports...")
         iob_annotations = []
         
         for i, (_, row) in enumerate(reports.iterrows(), 1):
-            article_start_time = time.time()
-            print(f"\nProcessing article {i}/{len(reports)}: {row['title'][:50]}...")
-            
             # Combine title and abstract
             text = f"{row['title']}. {row['abstract']}"
             
@@ -197,46 +186,31 @@ def main():
             tokens, tags = create_iob_annotations(text, knowledge_base)
             if tokens is not None and tags is not None:
                 iob_annotations.append((tokens, tags))
-                
-                # Count entities found
-                entity_count = sum(1 for tag in tags if tag != 'O')
-                print(f"Found {entity_count} entities in this article")
             
-            article_end_time = time.time()
-            article_duration = article_end_time - article_start_time
-            print(f"Article {i} processing time: {article_duration:.2f} seconds")
+            if i % 10 == 0:
+                print(f"Processed {i}/{len(reports)} reports")
         
         # Save annotated data
-        print("\nSaving annotated data...")
+        print("Saving annotated data...")
         output_dir = Path('annotated_data')
         output_dir.mkdir(exist_ok=True)
         
         # Save as JSON
-        json_start_time = time.time()
-        with open(output_dir / 'iob_annotations_5_articles.json', 'w', encoding='utf-8') as f:
+        with open(output_dir / 'iob_annotations.json', 'w') as f:
             json.dump([{'tokens': tokens, 'tags': tags} for tokens, tags in iob_annotations], f, indent=2)
-        json_end_time = time.time()
-        print(f"Saved IOB annotations in JSON format (took {json_end_time - json_start_time:.2f} seconds)")
+        print("Saved IOB annotations in JSON format")
         
-        # Save as CSV (CoNLL format)
-        tsv_start_time = time.time()
-        with open(output_dir / 'iob_annotations_5_articles.csv', 'w', encoding='utf-8') as f:
+        # Save as TSV (CoNLL format)
+        with open(output_dir / 'iob_annotations.tsv', 'w') as f:
             for tokens, tags in iob_annotations:
                 for token, tag in zip(tokens, tags):
                     f.write(f"{token}\t{tag}\n")
                 f.write("\n")  # Empty line between documents
-        tsv_end_time = time.time()
-        print(f"Saved IOB annotations in CSV format (took {tsv_end_time - tsv_start_time:.2f} seconds)")
+        print("Saved IOB annotations in TSV format")
         
         # Create visualizations
-        viz_start_time = time.time()
         visualize_iob_annotations(iob_annotations, output_dir)
-        viz_end_time = time.time()
-        print(f"Created visualizations (took {viz_end_time - viz_start_time:.2f} seconds)")
-        
-        end_time_total = time.time()
-        total_duration = end_time_total - start_time_total
-        print(f"\nProcess completed successfully in {total_duration:.2f} seconds")
+        print("Process completed successfully")
         
     except Exception as e:
         print(f"Error in main process: {str(e)}")
