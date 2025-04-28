@@ -41,6 +41,6 @@ def clean_pr_data():
     print(f"Cleaned data saved to {output_path}")
     print(f"Original rows: {len(df)}")
     print(f"Total terms (including synonyms): {len(df_cleaned)}")
-
+# this commment have no use
 if __name__ == "__main__":
     clean_pr_data() 
