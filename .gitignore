@@ -1,1 +1,24 @@
 data_collection/Knowledge_base/data/RawFiles/PR.csv
+
+# Model files
+bert_ner_model_version1/model.safetensors
+bert_ner_model_version1/*.bin
+bert_ner_model_version1/*.pt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
