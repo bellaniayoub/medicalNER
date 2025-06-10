@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical NER Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Poppins', sans-serif;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.1);
+        }
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="rgba(13, 110, 253, 0.1)"/></svg>');
+            opacity: 0.5;
+        }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            color: white;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+            border: none;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .custom-file-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .custom-file-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+            background: linear-gradient(45deg, #0b5ed7, #0bb8e0);
+        }
+        .custom-file-upload:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(13, 110, 253, 0.2);
+        }
+        .custom-file-upload i {
+            margin-right: 8px;
+        }
+        .submit-btn {
+            margin-top: 1.5rem;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            border: none;
+            color: white;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+        }
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loading-spinner {
+            display: none;
+            margin-left: 8px;
+        }
+        .loading-spinner.show {
+            display: inline-block;
+        }
+        .title {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+        .history-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .history-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 2rem;
+        }
+        .nav-tabs .nav-link {
+            color: #495057;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+            border: none;
+        }
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            font-weight: 600;
+            border: none;
+            border-bottom: 3px solid #0d6efd;
+        }
+        .stats-card {
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+        }
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .stats-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        .file-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(13, 110, 253, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+        .file-info.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .drag-text {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        .supported-formats {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 1rem;
+        }
+        .progress-container {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(13, 110, 253, 0.1);
+            border-radius: 10px;
+        }
+        .progress-container.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar {
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        .progress-status {
+            font-weight: 500;
+        }
+        .progress-percentage {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <h1 class="text-center title">Clinical NER Analysis</h1>
+        <p class="text-center subtitle">Upload your PDF document for advanced clinical entity recognition</p>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">
+                    <i class="bi bi-upload"></i> Upload
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                    <i class="bi bi-clock-history"></i> History
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab">
+                    <i class="bi bi-star"></i> Features
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Upload Tab -->
+            <div class="tab-pane fade show active" id="upload" role="tabpanel">
+                <form method="post" enctype="multipart/form-data" class="text-center">
+                    <div class="upload-area" id="dropZone">
+                        <div class="custom-file-upload">
+                            <i class="bi bi-file-earmark-pdf"></i> Choose PDF File
+                            <input type="file" name="pdf_file" accept="application/pdf" required 
+                                   id="pdfFile">
+                        </div>
+                        <p class="drag-text">or drag and drop your file here</p>
+                        <div class="file-info" id="fileInfo">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            <span id="fileName">No file chosen</span>
+                            <div class="supported-formats">
+                                Supported format: PDF
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress">
+                            <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span class="progress-status" id="progressStatus">Initializing...</span>
+                            <span class="progress-percentage" id="progressPercentage">0%</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn submit-btn" id="analyzeBtn">
+                        <i class="bi bi-search"></i> Analyze PDF
+                        <span class="loading-spinner" id="loadingSpinner">
+                            <i class="bi bi-arrow-repeat spin"></i>
+                        </span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- History Tab -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+                <!-- Quick Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">156</div>
+                            <div class="stats-label">Total Analyses</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">2,845</div>
+                            <div class="stats-label">Entities Found</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">1,234</div>
+                            <div class="stats-label">Diseases</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">987</div>
+                            <div class="stats-label">Genes</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="history-card">
+                            <h5 class="card-title">Recent Analysis</h5>
+                            <p class="card-text text-muted">Last analyzed: 2 hours ago</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">15 entities found</span>
+                                <button class="btn btn-sm btn-outline-primary">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="history-card">
+                            <h5 class="card-title">Previous Analysis</h5>
+                            <p class="card-text text-muted">Last analyzed: 1 day ago</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">23 entities found</span>
+                                <button class="btn btn-sm btn-outline-primary">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="history-card">
+                            <h5 class="card-title">Earlier Analysis</h5>
+                            <p class="card-text text-muted">Last analyzed: 3 days ago</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">18 entities found</span>
+                                <button class="btn btn-sm btn-outline-primary">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Tab -->
+            <div class="tab-pane fade" id="features" role="tabpanel">
+                <!-- Quick Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">156</div>
+                            <div class="stats-label">Total Analyses</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">2,845</div>
+                            <div class="stats-label">Entities Found</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">1,234</div>
+                            <div class="stats-label">Diseases</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number">987</div>
+                            <div class="stats-label">Genes</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="history-card">
+                            <i class="bi bi-search feature-icon"></i>
+                            <h5 class="card-title">Entity Recognition</h5>
+                            <p class="card-text">Advanced NER for clinical terms including diseases, symptoms, medications, and procedures.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="history-card">
+                            <i class="bi bi-file-pdf feature-icon"></i>
+                            <h5 class="card-title">PDF Processing</h5>
+                            <p class="card-text">High-quality PDF generation with color-coded clinical entity highlighting.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="history-card">
+                            <i class="bi bi-graph-up feature-icon"></i>
+                            <h5 class="card-title">Analytics</h5>
+                            <p class="card-text">Detailed statistics and clinical entity distribution analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File upload handling
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('pdfFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatus = document.getElementById('progressStatus');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const form = document.querySelector('form');
+        let isAnalyzing = false;
+
+        // Simulate progress updates
+        function updateProgress(percent, status) {
+            progressBar.style.width = percent + '%';
+            progressPercentage.textContent = percent + '%';
+            progressStatus.textContent = status;
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            if (isAnalyzing) {
+                e.preventDefault();
+                return;
+            }
+            
+            if (!fileInput.files[0]) {
+                e.preventDefault();
+                alert('Please select a PDF file first');
+                return;
+            }
+            
+            e.preventDefault(); // Prevent immediate form submission
+            isAnalyzing = true;
+            analyzeBtn.disabled = true;
+            loadingSpinner.classList.add('show');
+            progressContainer.classList.add('show');
+            
+            // Create FormData for file upload
+            const formData = new FormData(form);
+            
+            // Start the analysis process
+            updateProgress(0, 'Starting analysis...');
+            
+            // Simulate gradual progress up to 80%
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 80) {
+                    progress += 1;
+                    if (progress < 20) {
+                        updateProgress(progress, 'Reading PDF...');
+                    } else if (progress < 40) {
+                        updateProgress(progress, 'Processing text...');
+                    } else if (progress < 60) {
+                        updateProgress(progress, 'Identifying entities...');
+                    } else {
+                        updateProgress(progress, 'Finalizing analysis...');
+                    }
+                }
+            }, 100);
+
+            // Send the file to server
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Analysis failed');
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Clear the progress interval
+                clearInterval(progressInterval);
+                // Update progress to 100% when we have the results
+                updateProgress(100, 'Analysis complete!');
+                // Small delay to show 100% before redirecting
+                setTimeout(() => {
+                    // Replace the current page content with the results
+                    document.open();
+                    document.write(html);
+                    document.close();
+                }, 500);
+            })
+            .catch(error => {
+                // Clear the progress interval
+                clearInterval(progressInterval);
+                console.error('Error:', error);
+                updateProgress(0, 'Analysis failed. Please try again.');
+                isAnalyzing = false;
+                analyzeBtn.disabled = false;
+                loadingSpinner.classList.remove('show');
+            });
+
+            // Prevent navigation while analyzing
+            window.onbeforeunload = function() {
+                if (isAnalyzing) {
+                    return "Analysis in progress. Are you sure you want to leave?";
+                }
+            };
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.type === 'application/pdf') {
+                    fileName.textContent = file.name;
+                    fileInfo.classList.add('show');
+                    analyzeBtn.disabled = false;
+                    progressContainer.classList.remove('show');
+                    progressBar.style.width = '0%';
+                    progressPercentage.textContent = '0%';
+                    progressStatus.textContent = 'Ready to analyze';
+                } else {
+                    alert('Please select a PDF file');
+                    fileInput.value = '';
+                    fileName.textContent = 'No file chosen';
+                    fileInfo.classList.remove('show');
+                    analyzeBtn.disabled = true;
+                }
+            }
+        });
+
+        // Initially disable analyze button
+        analyzeBtn.disabled = true;
+
+        // Handle tab changes
+        document.querySelectorAll('.nav-link').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                if (isAnalyzing) {
+                    e.preventDefault();
+                    alert('Please wait for the current analysis to complete.');
+                    return false;
+                }
+            });
+        });
+
+        // Drag and drop handling
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#0d6efd';
+            dropZone.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#dee2e6';
+            dropZone.style.backgroundColor = '#f8f9fa';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#dee2e6';
+            dropZone.style.backgroundColor = '#f8f9fa';
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                fileInput.files = e.dataTransfer.files;
+                fileName.textContent = file.name;
+                fileInfo.classList.add('show');
+                analyzeBtn.disabled = false;
+                progressContainer.classList.remove('show');
+                progressBar.style.width = '0%';
+                progressPercentage.textContent = '0%';
+                progressStatus.textContent = 'Ready to analyze';
+            } else {
+                alert('Please upload a PDF file');
+            }
+        });
+    </script>
+</body>
+</html>

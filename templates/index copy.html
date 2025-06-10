@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biomedical NER Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .custom-file-upload:hover {
+            background-color: #0b5ed7;
+        }
+        .submit-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 2rem;
+        }
+        .title {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <h1 class="text-center title">Biomedical NER Analysis</h1>
+        <p class="text-center subtitle">Upload your PDF document for entity recognition and highlighting</p>
+        
+        <form method="post" enctype="multipart/form-data" class="text-center">
+            <div class="upload-area">
+                <input type="file" name="pdf_file" accept="application/pdf" required 
+                       class="form-control" id="pdfFile" style="display: none;">
+                <label for="pdfFile" class="custom-file-upload">
+                    <i class="bi bi-file-earmark-pdf"></i> Choose PDF File
+                </label>
+                <p class="mt-2 text-muted" id="fileName">No file chosen</p>
+            </div>
+            <button type="submit" class="btn btn-primary submit-btn">
+                Analyze PDF
+            </button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('pdfFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file chosen';
+            document.getElementById('fileName').textContent = fileName;
+        });
+    </script>
+</body>
+</html>
