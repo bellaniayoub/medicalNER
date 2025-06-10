@@ -1,0 +1,23 @@
+# Core NLP and Data Processing
+spacy==3.7.2
+pandas==2.1.4
+nltk==3.8.1
+PyMuPDF==1.23.8
+
+# Ontology Processing
+owlready2==0.47
+networkx==3.2.1
+matplotlib==3.8.2
+
+# Web Scraping and Data Collection
+requests==2.31.0
+beautifulsoup4==4.12.2
+
+# Additional Utilities
+tqdm>=4.62.3
+numpy>=1.21.2
+scikit-learn>=0.24.2
+
+# Deep Learning
+torch>=1.9.0
+transformers>=4.12.0 
