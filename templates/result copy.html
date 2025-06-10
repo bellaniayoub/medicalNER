@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NER Analysis Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .main-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        .title {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .entity-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .entity-count {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #0d6efd;
+        }
+        .highlighted-text {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .download-btn {
+            padding: 0.5rem 1.5rem;
+            margin: 1rem 0;
+        }
+        .back-btn {
+            color: #6c757d;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .back-btn:hover {
+            color: #0d6efd;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <h1 class="text-center title">Named Entity Recognition Results</h1>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Entity Statistics</h3>
+                        <div class="entity-card">
+                            {% for entity, count in entities_count.items() %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ entity }}</span>
+                                <span class="entity-count">{{ count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Color Legend</h3>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #FFB3B3;"></div>
+                                <span>Disease</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #FFD580;"></div>
+                                <span>Symptom</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #C3FDB8;"></div>
+                                <span>Gene</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #B0E0E6;"></div>
+                                <span>Protein</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Highlighted Text</h3>
+                <div class="highlighted-text">
+                    {{ highlighted_html | safe }}
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ pdf_url }}" class="btn btn-primary download-btn">
+                <i class="bi bi-download"></i> Download Highlighted PDF
+            </a>
+            <br>
+            <a href="{{ url_for('index') }}" class="back-btn">
+                <i class="bi bi-arrow-left"></i> Analyze another PDF
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

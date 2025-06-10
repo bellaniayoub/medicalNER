@@ -1,0 +1,47 @@
+{
+  "architectures": [
+    "BertForTokenClassification"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "B-DISEASE",
+    "1": "B-GENE",
+    "2": "B-PROTEIN",
+    "3": "B-SYMPTOM",
+    "4": "I-DISEASE",
+    "5": "I-GENE",
+    "6": "I-PROTEIN",
+    "7": "I-SYMPTOM",
+    "8": "O"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "B-DISEASE": 0,
+    "B-GENE": 1,
+    "B-PROTEIN": 2,
+    "B-SYMPTOM": 3,
+    "I-DISEASE": 4,
+    "I-GENE": 5,
+    "I-PROTEIN": 6,
+    "I-SYMPTOM": 7,
+    "O": 8
+  },
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "position_embedding_type": "absolute",
+  "torch_dtype": "float32",
+  "transformers_version": "4.51.3",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 28996
+}
